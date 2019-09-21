@@ -9,9 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.logika.Argument;
-import org.logika.TablaVerdadArgumento.Row;
+import org.logika.TablaVerdadArgumento.ArgumentRow;
 import org.logika.ExpressionOperations;
 import org.logika.TablaVerdadExpresion;
 import org.logika.TablaVerdadArgumento;
@@ -26,11 +27,9 @@ import org.logika.equivalence.Implication;
 import org.logika.equivalence.Tautology;
 import org.logika.equivalence.Transposition;
 import org.logika.exp.BinaryOperation;
-import org.logika.exp.BinaryOperator;
 import org.logika.exp.Expression;
 import org.logika.exp.Sentence;
 import org.logika.exp.UnaryOperation;
-import org.logika.exp.UnaryOperator;
 import org.logika.functions.Absorcion;
 import org.logika.functions.Adicion;
 import org.logika.functions.Conjuncion;
@@ -103,42 +102,12 @@ public class CommandInterpreter extends BaseListener {
     public void exitThruth_table_command(LogikaParser.Thruth_table_commandContext ctx) {
         if(ctx.getChild(1).getText().equals("argument")) {
             TablaVerdadArgumento tablaVerdad = argument.createTablaVerdad();
-            DefaultTableModel tableModel=new ThruthTableModel();
-            for (Character alias : tablaVerdad.getAliases()) {
-                tableModel.addColumn(alias);
-            }
-            for (int i=0; i < argument.getPremisesCount(); i++) {
-                tableModel.addColumn("R"+String.valueOf(i+1));
-            }
-            tableModel.addColumn("C");
-            for(Row row:tablaVerdad.getRows()) {
-                Object[] r=new Object[tablaVerdad.getAliases().size()+argument.getPremisesCount()+1];
-                for(int i=0; i < tablaVerdad.getAliases().size(); i++) {
-                    r[i]=row.getInputValue(i);
-                }
-                for(int i=0; i < argument.getPremisesCount(); i++) {
-                    r[i+tablaVerdad.getAliases().size()]=row.getPremiseValue(i);
-                }
-                r[r.length-1]=row.getConclusionValue();
-                tableModel.addRow(r);
-            }
+            TableModel tableModel=new ThruthTableModel(tablaVerdad);
             new ThruthTableDialog(owner, tableModel).setVisible(true);
         }else{
             Expression exp=(Expression) getStack().pop();
             TablaVerdadExpresion tablaVerdad = TablaVerdadExpresion.build(exp);
-            DefaultTableModel tableModel=new ThruthTableModel();
-            for (Character alias : tablaVerdad.getAliases()) {
-                tableModel.addColumn(alias);
-            }
-            tableModel.addColumn("R");
-            for(TablaVerdadExpresion.Row row:tablaVerdad.getRows()) {
-                Object[] r=new Object[tablaVerdad.getAliases().length+1];
-                for(int i=0; i < tablaVerdad.getAliases().length; i++) {
-                    r[i]=row.getInputValue(i);
-                }
-                r[r.length-1]=row.getConclusionValue();
-                tableModel.addRow(r);
-            }
+            TableModel tableModel=new ThruthTableModel(tablaVerdad);
             new ThruthTableDialog(owner, tableModel).setVisible(true);
         }
         

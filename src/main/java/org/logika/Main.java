@@ -4,7 +4,7 @@ import org.logika.exp.Sentence;
 import org.logika.exp.Expression;
 import java.util.HashMap;
 import java.util.Map;
-import org.logika.TablaVerdadExpresion.Row;
+import org.logika.TablaVerdadExpresion.SimpleRow;
 import static org.logika.exp.BinaryOperator.CONJUNCTION;
 import static org.logika.exp.BinaryOperator.DISYUNCTION;
 import static org.logika.exp.BinaryOperator.MATERIAL_EQUALITY;
@@ -55,7 +55,7 @@ public class Main {
             System.out.printf("--");
         }
         System.out.println("");
-        for(Row row: tablaVerdad.getRows()) {
+        for(SimpleRow row: tablaVerdad.getRows()) {
             for (int k=0; k < tablaVerdad.getAliases().length; k++) {
                 System.out.printf("%s ", row.getInputValue(k)? 'V': 'F');
             }

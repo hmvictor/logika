@@ -42,7 +42,7 @@ public class MainArgument {
         }
         System.out.println("----");
         
-        for (TablaVerdadArgumento.Row row : tablaVerdad.getRows()) {
+        for (TablaVerdadArgumento.ArgumentRow row : tablaVerdad.getRows()) {
             for (int k=0; k < tablaVerdad.getAliases().size(); k++) {
                 System.out.printf("%s ", row.getInputValue(k)? 'V': 'F');
             }

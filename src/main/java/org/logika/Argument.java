@@ -8,7 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.logika.TablaVerdadArgumento.Row;
+import org.logika.TablaVerdadArgumento.ArgumentRow;
 
 /**
  *
@@ -60,10 +60,10 @@ public class Argument {
         }
         
         boolean[] allowedValues={true, false};
-        List<Row> rows=new LinkedList<>();
+        List<ArgumentRow> rows=new LinkedList<>();
         List<Character> tmpAliases=new LinkedList<>(aliases);
         for(int r=0; r < (int)Math.pow(2, aliases.size()); r++) {
-            Row row=new Row(aliases.size(), premises.size());
+            ArgumentRow row=new ArgumentRow(aliases.size(), premises.size());
             for(int c=0; c < aliases.size(); c++) {
                 row.setInputValue(aliases.size()-c-1, allowedValues[(r/(int)Math.pow(2, c))%2]);
             }
