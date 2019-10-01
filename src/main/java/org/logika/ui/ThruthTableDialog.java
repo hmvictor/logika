@@ -1,6 +1,7 @@
 package org.logika.ui;
 
 import javax.swing.table.TableModel;
+import org.logika.TablaVerdadArgumento;
 
 /**
  *
@@ -15,10 +16,12 @@ public class ThruthTableDialog extends javax.swing.JDialog {
         super(parent, true);
         initComponents();
         table.setModel(model);
-        table.setDefaultRenderer(Boolean.class, new ThruthValueRender());
+        if(((ThruthTableModel)model).getTablaVerdad() instanceof TablaVerdadArgumento) {
+            table.setDefaultRenderer(Boolean.class, new ArgumentThruthValueRender());
+        }else{
+            table.setDefaultRenderer(Boolean.class, new ThruthValueRender());
+        }
     }
-    
-    
 
     /**
      * This method is called from within the constructor to initialize the form.

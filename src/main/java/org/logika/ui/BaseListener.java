@@ -46,4 +46,13 @@ public class BaseListener extends LogikaBaseListener {
         System.out.println("binary operation " + ctx.getText());
     }
 
+//    @Override
+//    public void exitSimple_binary_operation(LogikaParser.Simple_binary_operationContext ctx) {
+//        Expression right = (Expression) stack.pop();
+//        BinaryOperator operator = BinaryOperator.valueOfSymbol(ctx.getChild(1).getText());
+//        Expression left = (Expression) stack.pop();
+//        stack.push(new BinaryOperation(operator, left, right));
+//        System.out.println("simple binary operation " + ctx.getText());
+//    }
+    
 }

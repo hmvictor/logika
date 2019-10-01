@@ -42,7 +42,7 @@ public class TablaVerdadArgumento implements TablaVerdad {
         if(column < aliases.size()) {
             return String.valueOf(new LinkedList<>(aliases).get(column));
         }else if(column >= row.inputValues.length && column < (row.inputValues.length  + row.premisesValues.length)) {
-            return "R"+(column-aliases.size()+1);
+            return String.valueOf(column-aliases.size()+1);
         }else if(column == (row.inputValues.length  + row.premisesValues.length)){
             return "C";
         }else{
@@ -101,6 +101,14 @@ public class TablaVerdadArgumento implements TablaVerdad {
 
         public void setConclusionValue(boolean value) {
             conclusionValue = value;
+        }
+
+        public boolean negatesArgument() {
+            boolean a=true;
+            for (boolean value : premisesValues) {
+                a=a&&value;
+            }
+            return a && !conclusionValue;
         }
         
     }

@@ -1,38 +1,39 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.logika.ui;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.AbstractAction;
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.TableModel;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.logika.Argument;
+import org.logika.TablaVerdadArgumento;
 import org.logika.exp.BinaryOperator;
 import org.logika.exp.Expression;
 import org.logika.exp.UnaryOperator;
@@ -47,6 +48,11 @@ public class ArgumentFrame extends javax.swing.JFrame {
     private Path filePath;
     
     private List<Expression> demostrations=new LinkedList<>();
+    
+    private List<Section> sections=new LinkedList<>();
+    private Section currentSection;
+    
+    private CustomDocumentFilter customDocumentFilter=new CustomDocumentFilter();
 
     /**
      * Creates new form ArgumentFrame
@@ -59,16 +65,20 @@ public class ArgumentFrame extends javax.swing.JFrame {
         jButton5.addActionListener(actionListener);
         jButton6.addActionListener(actionListener);
         jButton7.addActionListener(actionListener);
-        argumentText.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("alt N"), "insertNegation");
+        argumentText.getInputMap().put(KeyStroke.getKeyStroke("alt N"), "insertNegation");
+        argumentText.getInputMap().put(KeyStroke.getKeyStroke("alt MINUS"), "insertNegation");
         argumentText.getActionMap().put("insertNegation", new InsertSymbolAction(UnaryOperator.NEGATION.getSymbol()));
         
         argumentText.getInputMap().put(KeyStroke.getKeyStroke("alt D"), "insertDisyunction");
+        argumentText.getInputMap().put(KeyStroke.getKeyStroke("alt V"), "insertDisyunction");
         argumentText.getActionMap().put("insertDisyunction", new InsertSymbolAction(BinaryOperator.DISYUNCTION.getSymbol()));
         
         argumentText.getInputMap().put(KeyStroke.getKeyStroke("alt C"), "insertConjunction");
+        argumentText.getInputMap().put(KeyStroke.getKeyStroke("alt PERIOD"), "insertConjunction");
         argumentText.getActionMap().put("insertConjunction", new InsertSymbolAction(BinaryOperator.CONJUNCTION.getSymbol()));
         
         argumentText.getInputMap().put(KeyStroke.getKeyStroke("alt I"), "insertImplication");
+        argumentText.getInputMap().put(KeyStroke.getKeyStroke("alt D"), "insertImplication");
         argumentText.getActionMap().put("insertImplication", new InsertSymbolAction(BinaryOperator.MATERIAL_IMPLICATION.getSymbol()));
         
         argumentText.getInputMap().put(KeyStroke.getKeyStroke("alt E"), "insertEquality");
@@ -78,15 +88,19 @@ public class ArgumentFrame extends javax.swing.JFrame {
         argumentText.getActionMap().put("insertThereof", new InsertSymbolAction("∴"));
         
         commandText.getInputMap().put(KeyStroke.getKeyStroke("alt N"), "insertNegation");
+        commandText.getInputMap().put(KeyStroke.getKeyStroke("alt MINUS"), "insertNegation");
         commandText.getActionMap().put("insertNegation", new InsertSymbolAction(UnaryOperator.NEGATION.getSymbol()));
 
         commandText.getInputMap().put(KeyStroke.getKeyStroke("alt D"), "insertDisyunction");
+        commandText.getInputMap().put(KeyStroke.getKeyStroke("alt V"), "insertDisyunction");
         commandText.getActionMap().put("insertDisyunction", new InsertSymbolAction(BinaryOperator.DISYUNCTION.getSymbol()));
         
         commandText.getInputMap().put(KeyStroke.getKeyStroke("alt C"), "insertConjunction");
+        commandText.getInputMap().put(KeyStroke.getKeyStroke("alt PERIOD"), "insertConjunction");
         commandText.getActionMap().put("insertConjunction", new InsertSymbolAction(BinaryOperator.CONJUNCTION.getSymbol()));
         
         commandText.getInputMap().put(KeyStroke.getKeyStroke("alt I"), "insertImplication");
+        commandText.getInputMap().put(KeyStroke.getKeyStroke("alt D"), "insertImplication");
         commandText.getActionMap().put("insertImplication", new InsertSymbolAction(BinaryOperator.MATERIAL_IMPLICATION.getSymbol()));
         
         commandText.getInputMap().put(KeyStroke.getKeyStroke("alt E"), "insertEquality");
@@ -111,6 +125,9 @@ public class ArgumentFrame extends javax.swing.JFrame {
             }
             
         });
+        ((AbstractDocument)argumentText.getDocument()).setDocumentFilter(customDocumentFilter);
+        ((AbstractDocument)commandText.getDocument()).setDocumentFilter(customDocumentFilter);
+        fileChooser.setFileFilter(new FileNameExtensionFilter("JSON", "json"));
     }
     
     private static class InsertSymbolAction extends AbstractAction {
@@ -157,6 +174,14 @@ public class ArgumentFrame extends javax.swing.JFrame {
         jButton9 = new javax.swing.JButton();
         jButton10 = new javax.swing.JButton();
         jButton11 = new javax.swing.JButton();
+        jButton12 = new javax.swing.JButton();
+        jButton13 = new javax.swing.JButton();
+        jButton14 = new javax.swing.JButton();
+        jButton16 = new javax.swing.JButton();
+        jButton17 = new javax.swing.JButton();
+        autoUppercase = new javax.swing.JCheckBox();
+
+        fileChooser.setFileFilter(null);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -165,6 +190,11 @@ public class ArgumentFrame extends javax.swing.JFrame {
         argumentText.setColumns(20);
         argumentText.setRows(5);
         argumentText.addFocusListener(focusListener);
+        argumentText.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                argumentTextFocusGained(evt);
+            }
+        });
         jScrollPane1.setViewportView(argumentText);
 
         jSplitPane1.setTopComponent(jScrollPane1);
@@ -179,6 +209,11 @@ public class ArgumentFrame extends javax.swing.JFrame {
         commandText.setColumns(20);
         commandText.setRows(5);
         commandText.addFocusListener(focusListener);
+        commandText.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                commandTextFocusGained(evt);
+            }
+        });
         jScrollPane3.setViewportView(commandText);
 
         jSplitPane2.setRightComponent(jScrollPane3);
@@ -232,6 +267,44 @@ public class ArgumentFrame extends javax.swing.JFrame {
             }
         });
 
+        jButton12.setText("Print Argument");
+        jButton12.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton12ActionPerformed(evt);
+            }
+        });
+
+        jButton13.setText("Argument Thruth Table");
+        jButton13.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton13ActionPerformed(evt);
+            }
+        });
+
+        jButton14.setText("Reset");
+        jButton14.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton14ActionPerformed(evt);
+            }
+        });
+
+        jButton16.setText("+");
+        jButton16.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton16ActionPerformed(evt);
+            }
+        });
+
+        jButton17.setText("...");
+        jButton17.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton17ActionPerformed(evt);
+            }
+        });
+
+        autoUppercase.setMnemonic('u');
+        autoUppercase.setText("Uppercase Auto");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -240,33 +313,49 @@ public class ArgumentFrame extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jSplitPane1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jButton2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButton3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButton5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButton6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButton7, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButton4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jButton9)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton10)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton11)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 190, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 224, Short.MAX_VALUE)
+                        .addComponent(jButton14)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton8)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton1)
-                        .addContainerGap())))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton16))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jButton12)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButton13)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(autoUppercase))
+                            .addComponent(jSplitPane1))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jButton7, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jButton6, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jButton5, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jButton4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButton3, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jButton2, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jButton17, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton12)
+                    .addComponent(jButton13)
+                    .addComponent(autoUppercase))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 402, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jButton2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -279,14 +368,18 @@ public class ArgumentFrame extends javax.swing.JFrame {
                         .addComponent(jButton6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton7)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton17))
+                    .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 465, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
                     .addComponent(jButton8)
                     .addComponent(jButton9)
                     .addComponent(jButton10)
-                    .addComponent(jButton11))
+                    .addComponent(jButton11)
+                    .addComponent(jButton14)
+                    .addComponent(jButton16))
                 .addContainerGap())
         );
 
@@ -302,6 +395,9 @@ public class ArgumentFrame extends javax.swing.JFrame {
         if(filePath == null) {
             if (fileChooser.showSaveDialog(ArgumentFrame.this) == JFileChooser.APPROVE_OPTION) {
                 filePath=fileChooser.getSelectedFile().toPath();
+                if(!filePath.toString().endsWith(".json")) {
+                    filePath=Path.of(filePath.toString()+".json");
+                }
             }else{
                 return;
             }
@@ -316,14 +412,67 @@ public class ArgumentFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton9ActionPerformed
 
     private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton11ActionPerformed
-//        argumentText.setText(null);
-//        commandText.setText(null);
-//        setTitle(null);
+        argumentText.setText("");
+        commandText.setText("");
+        filePath=null;
+        setTitle(null);
+        reset();
+        currentSection=new Section();
+        sections=new LinkedList<>();
+        sections.add(currentSection);
     }//GEN-LAST:event_jButton11ActionPerformed
 
     private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
         new BatchWorker().execute();
     }//GEN-LAST:event_jButton8ActionPerformed
+
+    private void jButton12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton12ActionPerformed
+        StringWriter stringWriter = new StringWriter();
+        parseArgument().print(new PrintWriter(stringWriter));
+        new TextDialog(this, stringWriter.toString()).setVisible(true);
+    }//GEN-LAST:event_jButton12ActionPerformed
+
+    private void jButton13ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton13ActionPerformed
+        TablaVerdadArgumento tablaVerdad = parseArgument().createTablaVerdad();
+        TableModel tableModel=new ThruthTableModel(tablaVerdad);
+        new ThruthTableDialog(this, tableModel).setVisible(true);
+    }//GEN-LAST:event_jButton13ActionPerformed
+
+    private void jButton14ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton14ActionPerformed
+        reset();
+    }//GEN-LAST:event_jButton14ActionPerformed
+
+    private void jButton16ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton16ActionPerformed
+        currentSection.setArgument(argumentText.getText());
+        currentSection.setCommands(commandText.getText());
+        currentSection=new Section();
+        sections.add(currentSection);
+        argumentText.setText("");
+        commandText.setText("");
+        reset();
+    }//GEN-LAST:event_jButton16ActionPerformed
+
+    private void jButton17ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton17ActionPerformed
+        Section selectedSection=new SearchDialog(this).open(sections);
+        if(selectedSection != null) {
+            currentSection=selectedSection;
+            argumentText.setText(currentSection.argument);
+            commandText.setText(currentSection.commands);
+        }
+    }//GEN-LAST:event_jButton17ActionPerformed
+
+    private void commandTextFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_commandTextFocusGained
+        autoUppercase.setSelected(false);
+    }//GEN-LAST:event_commandTextFocusGained
+
+    private void argumentTextFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_argumentTextFocusGained
+        autoUppercase.setSelected(true);
+    }//GEN-LAST:event_argumentTextFocusGained
+
+    private void reset() {
+        demostrations.clear();
+        demostrationText.setText(null);
+    }
 
     private JTextArea textArea;
 
@@ -361,25 +510,30 @@ public class ArgumentFrame extends javax.swing.JFrame {
         this.filePath=filePath;
         new LoadFileWorker(filePath).execute();
     }
+    
+    private Argument parseArgument() throws RecognitionException {
+        LogikaLexer lexer = new LogikaLexer(CharStreams.fromString(argumentText.getText().trim()));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        LogikaParser parser = new LogikaParser(tokens);
+        ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
+        LogikaBaseListenerImpl logikaBaseListenerImpl = new LogikaBaseListenerImpl();
+        parseTreeWalker.walk(logikaBaseListenerImpl, parser.argument());
+        Argument argument = logikaBaseListenerImpl.getArgument();
+        return argument;
+    }
 
     private class CommandWorker extends SwingWorker<Void, Void> {
 
         @Override
         protected Void doInBackground() throws Exception {
-            LogikaLexer lexer = new LogikaLexer(CharStreams.fromString(argumentText.getText().trim()));
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
-            LogikaParser parser = new LogikaParser(tokens);
-            ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
-            LogikaBaseListenerImpl logikaBaseListenerImpl = new LogikaBaseListenerImpl();
-            parseTreeWalker.walk(logikaBaseListenerImpl, parser.argument());
-            Argument argument = logikaBaseListenerImpl.getArgument();
+            Argument argument = parseArgument();
             
             int caretpos = commandText.getCaretPosition();
             int linenum = commandText.getLineOfOffset(caretpos);
-            lexer = new LogikaLexer(CharStreams.fromString(commandText.getText().split("\n")[linenum].trim()));
-            tokens = new CommonTokenStream(lexer);
-            parser = new LogikaParser(tokens);
-            parseTreeWalker = new ParseTreeWalker();
+            LogikaLexer lexer = new LogikaLexer(CharStreams.fromString(commandText.getText().split("\n")[linenum].trim()));
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            LogikaParser parser = new LogikaParser(tokens);
+            ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
             CommandInterpreter commandInterpreter = new CommandInterpreter(ArgumentFrame.this, argument, demostrations);
             parseTreeWalker.walk(commandInterpreter, parser.command());
             Object result=commandInterpreter.getResult();
@@ -408,21 +562,15 @@ public class ArgumentFrame extends javax.swing.JFrame {
 
         @Override
         protected Void doInBackground() throws Exception {
-            LogikaLexer lexer = new LogikaLexer(CharStreams.fromString(argumentText.getText().trim()));
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
-            LogikaParser parser = new LogikaParser(tokens);
-            ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
-            LogikaBaseListenerImpl logikaBaseListenerImpl = new LogikaBaseListenerImpl();
-            parseTreeWalker.walk(logikaBaseListenerImpl, parser.argument());
-            Argument argument = logikaBaseListenerImpl.getArgument();
+            Argument argument = parseArgument();
             
             demostrations.clear();
             demostrationText.setText(null);
             for (String command : commandText.getText().split("\n")) {
-                lexer = new LogikaLexer(CharStreams.fromString(command.trim()));
-                tokens = new CommonTokenStream(lexer);
-                parser = new LogikaParser(tokens);
-                parseTreeWalker = new ParseTreeWalker();
+                LogikaLexer lexer = new LogikaLexer(CharStreams.fromString(command.trim()));
+                CommonTokenStream tokens = new CommonTokenStream(lexer);
+                LogikaParser parser = new LogikaParser(tokens);
+                ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
                 CommandInterpreter commandInterpreter = new CommandInterpreter(ArgumentFrame.this, argument, demostrations);
                 parseTreeWalker.walk(commandInterpreter, parser.command());
                 Object result=commandInterpreter.getResult();
@@ -458,10 +606,9 @@ public class ArgumentFrame extends javax.swing.JFrame {
 
         @Override
         protected Void doInBackground() throws Exception {
-            ObjectNode objectNode = new ObjectNode(JsonNodeFactory.instance);
-            objectNode.set("argument", new TextNode(argumentText.getText()));
-            objectNode.set("commands", new TextNode(commandText.getText()));
-            Files.writeString(filePath, new ObjectMapper().writeValueAsString(objectNode), StandardCharsets.UTF_8);
+            currentSection.setArgument(argumentText.getText());
+            currentSection.setCommands(commandText.getText());
+            Files.writeString(filePath, new ObjectMapper().writeValueAsString(sections.toArray(new Section[sections.size()])), StandardCharsets.UTF_8);
             return null;
         }
 
@@ -477,7 +624,7 @@ public class ArgumentFrame extends javax.swing.JFrame {
 
     }
 
-    private class LoadFileWorker extends SwingWorker<JsonNode, Void> {
+    private class LoadFileWorker extends SwingWorker<Section[], Void> {
 
         private Path filePath;
 
@@ -486,17 +633,21 @@ public class ArgumentFrame extends javax.swing.JFrame {
         }
 
         @Override
-        protected JsonNode doInBackground() throws Exception {
-            return new ObjectMapper().readTree(Files.readString(filePath, StandardCharsets.UTF_8));
+        protected Section[] doInBackground() throws Exception {
+            return new ObjectMapper().readValue(Files.readString(filePath, StandardCharsets.UTF_8), Section[].class);
         }
 
         @Override
         protected void done() {
             try {
-                JsonNode node = get();
-                if (node != null) {
-                    argumentText.setText(node.get("argument").asText());
-                    commandText.setText(node.get("commands").asText());
+                sections=new LinkedList<>(Arrays.asList(get()));
+                if (sections != null) {
+                    currentSection=sections.get(0);
+                    boolean filterEnabled = customDocumentFilter.isEnabled();
+                    customDocumentFilter.setEnabled(false);
+                    argumentText.setText(currentSection.argument);
+                    commandText.setText(currentSection.commands);
+                    customDocumentFilter.setEnabled(filterEnabled);
                 }
                 setTitle(filePath.toAbsolutePath().toString());
             } catch (InterruptedException | ExecutionException ex) {
@@ -504,6 +655,36 @@ public class ArgumentFrame extends javax.swing.JFrame {
             }
         }
 
+    }
+    
+    public static class Section {
+        private String argument;
+        private String commands;
+
+        public Section(String argument, String commands) {
+            this.argument = argument;
+            this.commands = commands;
+        }
+
+        public Section() {
+        }
+
+        public String getArgument() {
+            return argument;
+        }
+
+        public void setArgument(String argument) {
+            this.argument = argument;
+        }
+
+        public String getCommands() {
+            return commands;
+        }
+
+        public void setCommands(String commands) {
+            this.commands = commands;
+        }
+        
     }
 
     /**
@@ -544,12 +725,18 @@ public class ArgumentFrame extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextArea argumentText;
+    private javax.swing.JCheckBox autoUppercase;
     private javax.swing.JTextArea commandText;
     private javax.swing.JTextArea demostrationText;
     private javax.swing.JFileChooser fileChooser;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton10;
     private javax.swing.JButton jButton11;
+    private javax.swing.JButton jButton12;
+    private javax.swing.JButton jButton13;
+    private javax.swing.JButton jButton14;
+    private javax.swing.JButton jButton16;
+    private javax.swing.JButton jButton17;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
@@ -564,4 +751,33 @@ public class ArgumentFrame extends javax.swing.JFrame {
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JSplitPane jSplitPane2;
     // End of variables declaration//GEN-END:variables
+
+    private class CustomDocumentFilter extends DocumentFilter {
+        private boolean enabled=true;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+        
+        @Override
+        public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+            super.replace(fb, offset, length, enabled && autoUppercase.isSelected()? text.toUpperCase(): text, attrs);
+        }
+
+        @Override
+        public void insertString(DocumentFilter.FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+            super.insertString(fb, offset, enabled && autoUppercase.isSelected() ? string.toUpperCase(): string, attr);
+        }
+
+        @Override
+        public void remove(DocumentFilter.FilterBypass fb, int offset, int length) throws BadLocationException {
+            super.remove(fb, offset, length);
+        }
+        
+    }
+    
 }

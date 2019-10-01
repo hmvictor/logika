@@ -9,8 +9,6 @@ import org.logika.exp.Expression;
  */
 public interface Pattern {
     
-//    void match(Map<String, Expression> expressionMap, Expression expresion);
-    
     Matcher createMatcher(Expression exp);
     
     Expression buildExpression(Map<String, Expression> expressionMap);

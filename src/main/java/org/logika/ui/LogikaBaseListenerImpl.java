@@ -27,7 +27,7 @@ public class LogikaBaseListenerImpl extends BaseListener {
     public void exitPremises(LogikaParser.PremisesContext ctx) {
         List<Expression> premises = new LinkedList<>();
         for (LogikaParser.PropositionContext propositionContext : ctx.proposition()) {
-            premises.add((Expression) getStack().pop());
+            premises.add(0, (Expression) getStack().pop());
         }
         getStack().push(premises);
         System.out.println("premises " + ctx.getText());

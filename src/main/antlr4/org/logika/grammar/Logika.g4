@@ -78,6 +78,7 @@ proposition
     : unary_operation
     | binary_operation
     | sentence_expression
+    /*| simple_binary_operation */
     ;
 
 sentence_expression
@@ -92,6 +93,10 @@ operation
 unary_operation
     : UNARY_OPERATOR proposition
     ;
+
+/*simple_binary_operation 
+    : sentence_expression BINARY_OPERATOR sentence_expression
+    ;*/
 
 binary_operation 
     : '(' proposition BINARY_OPERATOR proposition ')'

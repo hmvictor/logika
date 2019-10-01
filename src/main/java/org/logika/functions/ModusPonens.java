@@ -10,7 +10,7 @@ import static org.logika.functions.VarPattern.var;
  *
  * @author Víctor
  */
-public class ModusPonen implements ExpressionFunction {
+public class ModusPonens implements ExpressionFunction {
 
     @Override
     public Expression apply(Expression... expressions) {

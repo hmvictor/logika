@@ -14,6 +14,10 @@ public class ThruthTableModel extends AbstractTableModel {
         this.tablaVerdad = tablaVerdad;
     }
 
+    public TablaVerdad getTablaVerdad() {
+        return tablaVerdad;
+    }
+    
     @Override
     public String getColumnName(int column) {
         return tablaVerdad.getColumnName(column);

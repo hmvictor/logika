@@ -24,18 +24,18 @@ public class BinaryOperationPattern implements Pattern{
     public Matcher createMatcher(Expression exp) {
         Matcher matcher=new Matcher();
         matcher.setResult(true);
-        if(!(exp instanceof BinaryOperation)) {
-            matcher.setResult(false);
-            matcher.addMessage("Mismatch operation");
-        }
         if(exp instanceof BinaryOperation) {
             BinaryOperation operation=(BinaryOperation) exp;
-            if(!operation.getOperator().equals(operator)) {
+            if(operation.getOperator().equals(operator)) {
+                matcher=matcher.merge(left.createMatcher(operation.getLeft()));
+                matcher=matcher.merge(right.createMatcher(operation.getRight()));
+            }else{
                 matcher.setResult(false);
                 matcher.addMessage("Mismatch operator");
             }
-            matcher=matcher.merge(left.createMatcher(operation.getLeft()));
-            matcher=matcher.merge(right.createMatcher(operation.getRight()));
+        }else{
+            matcher.setResult(false);
+            matcher.addMessage("Mismatch operation");
         }
         return matcher;
     }

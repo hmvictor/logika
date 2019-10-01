@@ -30,6 +30,9 @@ public class Transformation {
         for (Matching matching : matchings) {
             matcher = matcher.merge(matching.pattern.createMatcher(expressions[matching.index]));
         }
+        if(!matcher.getResult()) {
+            throw new IllegalArgumentException("No match!");
+        }
         return function.apply(new TransformationContext(matcher.getExpressionMap(), expressions));
     }
     
