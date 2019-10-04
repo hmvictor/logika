@@ -11,7 +11,7 @@ public class Conjuncion implements ExpressionFunction {
 
     @Override
     public Expression apply(Expression... expressions) {
-        return CONJUNCTION.expression(expressions[0], expressions[1]);
+        return CONJUNCTION.of(expressions[0], expressions[1]);
     }
     
 }

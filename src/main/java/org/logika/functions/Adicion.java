@@ -11,7 +11,7 @@ public class Adicion implements ExpressionFunction {
 
     @Override
     public Expression apply(Expression... expressions) {
-        return DISYUNCTION.expression(expressions[0], expressions[1]);
+        return DISYUNCTION.of(expressions[0], expressions[1]);
     }
     
 }

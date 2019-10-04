@@ -33,14 +33,14 @@ public class BaseListener extends LogikaBaseListener {
 
     @Override
     public void exitUnary_operation(LogikaParser.Unary_operationContext ctx) {
-        stack.push(new UnaryOperation(UnaryOperator.valueOfSymbol(ctx.getChild(0).getText()), (Expression) stack.pop()));
+        stack.push(new UnaryOperation(UnaryOperator.of(ctx.getChild(0).getText()), (Expression) stack.pop()));
         System.out.println("unary operation " + ctx.getText());
     }
 
     @Override
     public void exitBinary_operation(LogikaParser.Binary_operationContext ctx) {
         Expression right = (Expression) stack.pop();
-        BinaryOperator operator = BinaryOperator.valueOfSymbol(ctx.getChild(2).getText());
+        BinaryOperator operator = BinaryOperator.of(ctx.getChild(2).getText());
         Expression left = (Expression) stack.pop();
         stack.push(new BinaryOperation(operator, left, right));
         System.out.println("binary operation " + ctx.getText());

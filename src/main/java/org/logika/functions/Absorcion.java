@@ -17,8 +17,8 @@ public class Absorcion implements ExpressionFunction {
         return Transformation.given(
             new Matching(0, MATERIAL_IMPLICATION.pattern("a", "b"))
         ).then((TransformationContext context) -> 
-            MATERIAL_IMPLICATION.expression(context.getExpressionMap().get("a"),
-                CONJUNCTION.expression(context.getExpressionMap().get("a"), context.getExpressionMap().get("b"))
+            MATERIAL_IMPLICATION.of(context.getExpressionMap().get("a"),
+                CONJUNCTION.of(context.getExpressionMap().get("a"), context.getExpressionMap().get("b"))
             )
         ).apply(expressions);
     }

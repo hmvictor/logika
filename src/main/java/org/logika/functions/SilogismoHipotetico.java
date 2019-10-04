@@ -17,14 +17,14 @@ public class SilogismoHipotetico implements ExpressionFunction {
             new Matching(0, MATERIAL_IMPLICATION.pattern("a", "b")),
             new Matching(1, MATERIAL_IMPLICATION.pattern("b", "c"))
         ).then((Transformation.TransformationContext context) -> {
-            return MATERIAL_IMPLICATION.expression(context.getExpressionMap().get("a"), context.getExpressionMap().get("c"));
+            return MATERIAL_IMPLICATION.of(context.getExpressionMap().get("a"), context.getExpressionMap().get("c"));
         }).apply(expressions);
     }
     
     public static void main(String[] args) {
         Expression exp = new SilogismoHipotetico().apply(
-                MATERIAL_IMPLICATION.expression(new Sentence('A'), new Sentence('B')),
-                MATERIAL_IMPLICATION.expression(new Sentence('B'), new Sentence('C')));
+                MATERIAL_IMPLICATION.of(new Sentence('A'), new Sentence('B')),
+                MATERIAL_IMPLICATION.of(new Sentence('B'), new Sentence('C')));
         System.out.println(exp);
     }
 

@@ -22,7 +22,7 @@ public class DilemaConstructivo implements ExpressionFunction {
             )),
             new Matching(1, DISYUNCTION.pattern("a", "c"))
         ).then((TransformationContext context) -> 
-            DISYUNCTION.expression(context.getExpressionMap().get("b"), context.getExpressionMap().get("d"))
+            DISYUNCTION.of(context.getExpressionMap().get("b"), context.getExpressionMap().get("d"))
         ).apply(expressions);
     }
     

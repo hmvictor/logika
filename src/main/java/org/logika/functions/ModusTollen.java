@@ -17,7 +17,7 @@ public class ModusTollen implements ExpressionFunction {
             new Matching(0, MATERIAL_IMPLICATION.pattern("a", "b")),
             new Matching(1, NEGATION.pattern("b"))
         ).then((Transformation.TransformationContext context) -> 
-            NEGATION.expression(context.getExpressionMap().get("a"))
+            NEGATION.of(context.getExpressionMap().get("a"))
         ).apply(expressions);
     }
     

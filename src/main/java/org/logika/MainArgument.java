@@ -15,8 +15,8 @@ public class MainArgument {
             new Argument()
                 .given('C', "los coches vuelan")
                 .given('A', "las aves vuelan")
-                .premise(DISYUNCTION.expression(new Sentence('C'), new Sentence('A')))
-                .then(DISYUNCTION.expression(new Sentence('A'), new Sentence('C')));
+                .premise(DISYUNCTION.of(new Sentence('C'), new Sentence('A')))
+                .then(DISYUNCTION.of(new Sentence('A'), new Sentence('C')));
         argument.print(new PrintWriter(System.out));
         
         System.out.println();

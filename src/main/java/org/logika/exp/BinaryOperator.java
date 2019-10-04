@@ -83,8 +83,12 @@ public enum BinaryOperator implements Operator {
         throw new UnsupportedOperationException();
     }
     
-    public Expression expression(Expression left, Expression right) {
+    public Expression of(Expression left, Expression right) {
         return new BinaryOperation(this, left, right);
+    }
+    
+    public Expression of(char left, char right) {
+        return new BinaryOperation(this, new Sentence(left), new Sentence(right));
     }
     
     public BinaryOperationPattern pattern(Pattern left, Pattern right) {
@@ -95,7 +99,7 @@ public enum BinaryOperator implements Operator {
         return new BinaryOperationPattern(this, var(left), var(right));
     }
     
-    public static BinaryOperator valueOfSymbol(String text) {
+    public static BinaryOperator of(String text) {
         for (BinaryOperator value : values()) {
             if(value.getSymbol().equals(text)) {
                 return value;

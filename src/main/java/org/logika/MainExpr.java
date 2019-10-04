@@ -15,7 +15,7 @@ import static org.logika.exp.UnaryOperator.NEGATION;
 public class MainExpr {
     
     public static void main(String[] args) {
-        Expression expr=CONJUNCTION.expression(new Sentence('A'), NEGATION.expression(DISYUNCTION.expression(new Sentence('B'), new Sentence('C'))));
+        Expression expr=CONJUNCTION.of(new Sentence('A'), NEGATION.of(DISYUNCTION.of(new Sentence('B'), new Sentence('C'))));
         
         System.out.println(((Operator)OPERATOR.apply(expr)).getSymbol());
         System.out.println(LEFT_OPERAND.apply(expr));

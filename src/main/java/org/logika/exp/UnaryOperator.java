@@ -34,8 +34,12 @@ public enum UnaryOperator implements Operator{
         return symbol;
     }
     
-    public Expression expression(Expression exp) {
+    public Expression of(Expression exp) {
         return new UnaryOperation(this, exp);
+    }
+    
+    public Expression of(char sentence) {
+        return new UnaryOperation(this, new Sentence(sentence));
     }
     
     public UnaryOperationPattern pattern(Pattern exp) {
@@ -46,7 +50,7 @@ public enum UnaryOperator implements Operator{
         return new UnaryOperationPattern(this, var(alias));
     }
     
-    public static UnaryOperator valueOfSymbol(String text) {
+    public static UnaryOperator of(String text) {
         for (UnaryOperator value : values()) {
             if(value.getSymbol().equals(text)) {
                 return value;

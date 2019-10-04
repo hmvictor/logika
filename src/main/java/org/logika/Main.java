@@ -30,20 +30,20 @@ public class Main {
         Map<Character, Boolean> values=new HashMap<>();
         values.put('A', true);
         values.put('B', true);
-        System.out.printf("Result: %s%n", CONJUNCTION.expression(a, b).evaluate(values));
+        System.out.printf("Result: %s%n", CONJUNCTION.of(a, b).evaluate(values));
         
-        System.out.printf("Result: %s%n", CONJUNCTION.expression(a, NEGATION.expression(a)).evaluate(values));
-        System.out.printf("Result: %s%n", DISYUNCTION.expression(a, NEGATION.expression(a)).evaluate(values));
+        System.out.printf("Result: %s%n", CONJUNCTION.of(a, NEGATION.of(a)).evaluate(values));
+        System.out.printf("Result: %s%n", DISYUNCTION.of(a, NEGATION.of(a)).evaluate(values));
         
         values.put('A', true);
         values.put('B', true);
         values.put('C', false);
-        System.out.printf("Result: %s%n", MATERIAL_IMPLICATION.expression(a, CONJUNCTION.expression(b, c)).evaluate(values));
+        System.out.printf("Result: %s%n", MATERIAL_IMPLICATION.of(a, CONJUNCTION.of(b, c)).evaluate(values));
         
-        System.out.println(ExpressionOperations.getAliases(MATERIAL_IMPLICATION.expression(a, CONJUNCTION.expression(b, c))));
+        System.out.println(ExpressionOperations.getAliases(MATERIAL_IMPLICATION.of(a, CONJUNCTION.of(b, c))));
         
-        Expression exp=MATERIAL_IMPLICATION.expression(a, MATERIAL_EQUALITY.expression(b, c));
-        exp=NEGATION.expression(CONJUNCTION.expression(a, a));
+        Expression exp=MATERIAL_IMPLICATION.of(a, MATERIAL_EQUALITY.of(b, c));
+        exp=NEGATION.of(CONJUNCTION.of(a, a));
         
         TablaVerdadExpresion tablaVerdad=TablaVerdadExpresion.build(exp);
         
