@@ -20,4 +20,4 @@ UNARY_OPERATOR : '~';
 
 BINARY_OPERATOR : '˅' | '⊃' | '≡' | '•';
 
-SENTENCE : [A-W];
+SENTENCE : [A-Z];

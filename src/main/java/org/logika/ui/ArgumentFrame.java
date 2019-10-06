@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.SwingWorker;
@@ -31,10 +32,12 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 import org.logika.Argument;
 import org.logika.TablaVerdadArgumento;
+import org.logika.TablaVerdadExpresion;
 import org.logika.exp.BinaryOperator;
 import org.logika.exp.Expression;
 import org.logika.exp.UnaryOperator;
 import org.logika.parsing.CommandInterpreter;
+import org.logika.parsing.PropositionalExpressionParser;
 
 /**
  *
@@ -263,14 +266,14 @@ public class ArgumentFrame extends javax.swing.JFrame {
             }
         });
 
-        jButton12.setText("Print Argument");
+        jButton12.setText("Print ...");
         jButton12.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton12ActionPerformed(evt);
             }
         });
 
-        jButton13.setText("Argument Thruth Table");
+        jButton13.setText(" Thruth Table ...");
         jButton13.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton13ActionPerformed(evt);
@@ -423,16 +426,62 @@ public class ArgumentFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton8ActionPerformed
 
     private void jButton12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton12ActionPerformed
-        StringWriter stringWriter = new StringWriter();
-        new ArgumentParser().parseArgument(argumentText.getText().trim()).print(new PrintWriter(stringWriter));
-        new TextDialog(this, stringWriter.toString()).setVisible(true);
+        String input = JOptionPane.showInputDialog(this, "Enter a expression, number or leave null for argument");
+        if(input != null) {
+            Argument argumento = new ArgumentParser().parseArgument(argumentText.getText().trim());
+            StringWriter stringWriter = new StringWriter();
+            if(input.isBlank()) {
+                argumento.print(new PrintWriter(stringWriter));
+            }else{
+                Expression expression=null;
+                try{
+                    int index=Integer.parseInt(input);
+                    expression = getExpression(argumento, index);
+                }catch(NumberFormatException ex) {
+                    expression=new PropositionalExpressionParser().parse(input);
+                }
+                if(expression != null) {
+                    stringWriter.append(expression.toUserString(argumento.getDescriptionByAlias()));
+                }
+            }
+            new TextDialog(this, stringWriter.toString()).setVisible(true);
+        }
     }//GEN-LAST:event_jButton12ActionPerformed
 
     private void jButton13ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton13ActionPerformed
-        TablaVerdadArgumento tablaVerdad = new ArgumentParser().parseArgument(argumentText.getText().trim()).createTablaVerdad();
-        TableModel tableModel=new ThruthTableModel(tablaVerdad);
-        new ThruthTableDialog(this, tableModel).setVisible(true);
+        String input = JOptionPane.showInputDialog(this, "Enter a expression, number or leave null for argument");
+        if(input != null) {
+            Argument argumento = new ArgumentParser().parseArgument(argumentText.getText().trim());
+            if(input.isBlank()) {
+                TablaVerdadArgumento tablaVerdad = argumento.createTablaVerdad();
+                TableModel tableModel=new ThruthTableModel(tablaVerdad);
+                new ThruthTableDialog(this, tableModel).setVisible(true);
+            }else{
+                Expression expression=null;
+                try{
+                    int index=Integer.parseInt(input);
+                    expression = getExpression(argumento, index);
+                }catch(NumberFormatException ex) {
+                    expression=new PropositionalExpressionParser().parse(input);
+                }
+                if(expression != null) {
+                    TablaVerdadExpresion tablaVerdad = TablaVerdadExpresion.build(expression);
+                    TableModel tableModel=new ThruthTableModel(tablaVerdad);
+                    new ThruthTableDialog(this, tableModel).setVisible(true);
+                }
+            }
+        }
     }//GEN-LAST:event_jButton13ActionPerformed
+
+    private Expression getExpression(Argument argumento, int index) {
+        Expression expression;
+        if((index-1) < argumento.getPremisesCount()) {
+            expression=argumento.getPremise(index-1);
+        }else {
+            expression=demostrations.get((index-1)-argumento.getPremisesCount());
+        }
+        return expression;
+    }
 
     private void jButton14ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton14ActionPerformed
         reset();
