@@ -1,5 +1,6 @@
 package org.logika.ui;
 
+import org.logika.parsing.ArgumentParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,17 +29,12 @@ import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.logika.Argument;
 import org.logika.TablaVerdadArgumento;
 import org.logika.exp.BinaryOperator;
 import org.logika.exp.Expression;
 import org.logika.exp.UnaryOperator;
-import org.logika.grammar.LogikaLexer;
-import org.logika.grammar.LogikaParser;
+import org.logika.parsing.CommandInterpreter;
 
 /**
  *
@@ -428,12 +424,12 @@ public class ArgumentFrame extends javax.swing.JFrame {
 
     private void jButton12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton12ActionPerformed
         StringWriter stringWriter = new StringWriter();
-        parseArgument().print(new PrintWriter(stringWriter));
+        new ArgumentParser().parseArgument(argumentText.getText().trim()).print(new PrintWriter(stringWriter));
         new TextDialog(this, stringWriter.toString()).setVisible(true);
     }//GEN-LAST:event_jButton12ActionPerformed
 
     private void jButton13ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton13ActionPerformed
-        TablaVerdadArgumento tablaVerdad = parseArgument().createTablaVerdad();
+        TablaVerdadArgumento tablaVerdad = new ArgumentParser().parseArgument(argumentText.getText().trim()).createTablaVerdad();
         TableModel tableModel=new ThruthTableModel(tablaVerdad);
         new ThruthTableDialog(this, tableModel).setVisible(true);
     }//GEN-LAST:event_jButton13ActionPerformed
@@ -511,40 +507,22 @@ public class ArgumentFrame extends javax.swing.JFrame {
         new LoadFileWorker(filePath).execute();
     }
     
-    private Argument parseArgument() throws RecognitionException {
-        throw new UnsupportedOperationException();
-//        LogikaLexer lexer = new LogikaLexer(CharStreams.fromString(argumentText.getText().trim()));
-//        CommonTokenStream tokens = new CommonTokenStream(lexer);
-//        LogikaParser parser = new LogikaParser(tokens);
-//        ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
-//        ArgumentListener logikaBaseListenerImpl = new ArgumentListener();
-//        parseTreeWalker.walk(logikaBaseListenerImpl, parser.argument());
-//        Argument argument = logikaBaseListenerImpl.getArgument();
-//        return argument;
-    }
-
     private class CommandWorker extends SwingWorker<Void, Void> {
 
         @Override
         protected Void doInBackground() throws Exception {
-//            Argument argument = parseArgument();
-//            
-//            int caretpos = commandText.getCaretPosition();
-//            int linenum = commandText.getLineOfOffset(caretpos);
-//            LogikaLexer lexer = new LogikaLexer(CharStreams.fromString(commandText.getText().split("\n")[linenum].trim()));
-//            CommonTokenStream tokens = new CommonTokenStream(lexer);
-//            LogikaParser parser = new LogikaParser(tokens);
-//            ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
-//            CommandInterpreter commandInterpreter = new CommandInterpreter(ArgumentFrame.this, argument, demostrations);
-//            parseTreeWalker.walk(commandInterpreter, parser.command());
-//            Object result=commandInterpreter.getResult();
-//            if(result instanceof Expression) {
-//                if(!demostrationText.getText().trim().isEmpty()) {
-//                    demostrationText.append("\n");
-//                }
-//                demostrations.add((Expression) result);
-//                demostrationText.append(result.toString());
-//            }
+            Argument argument = new ArgumentParser().parseArgument(argumentText.getText().trim());
+            int caretpos = commandText.getCaretPosition();
+            int linenum = commandText.getLineOfOffset(caretpos);
+            CommandInterpreter commandInterpreter = new CommandInterpreter(ArgumentFrame.this, argument, demostrations);
+            Object result=commandInterpreter.execute(commandText.getText().split("\n")[linenum].trim());
+            if(result instanceof Expression) {
+                if(!demostrationText.getText().trim().isEmpty()) {
+                    demostrationText.append("\n");
+                }
+                demostrations.add((Expression) result);
+                demostrationText.append(result.toString());
+            }
             return null;
         }
 
@@ -563,26 +541,21 @@ public class ArgumentFrame extends javax.swing.JFrame {
 
         @Override
         protected Void doInBackground() throws Exception {
-            Argument argument = parseArgument();
+            Argument argument = new ArgumentParser().parseArgument(argumentText.getText().trim());
             
             demostrations.clear();
             demostrationText.setText(null);
-//            for (String command : commandText.getText().split("\n")) {
-//                LogikaLexer lexer = new LogikaLexer(CharStreams.fromString(command.trim()));
-//                CommonTokenStream tokens = new CommonTokenStream(lexer);
-//                LogikaParser parser = new LogikaParser(tokens);
-//                ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
-//                CommandInterpreter commandInterpreter = new CommandInterpreter(ArgumentFrame.this, argument, demostrations);
-//                parseTreeWalker.walk(commandInterpreter, parser.command());
-//                Object result=commandInterpreter.getResult();
-//                if(result instanceof Expression) {
-//                    if(!demostrationText.getText().trim().isEmpty()) {
-//                        demostrationText.append("\n");
-//                    }
-//                    demostrations.add((Expression) result);
-//                    demostrationText.append(result.toString());
-//                }
-//            }
+            CommandInterpreter commandInterpreter = new CommandInterpreter(ArgumentFrame.this, argument, demostrations);
+            for (String command : commandText.getText().split("\n")) {
+                Object result=commandInterpreter.execute(command);
+                if(result instanceof Expression) {
+                    if(!demostrationText.getText().trim().isEmpty()) {
+                        demostrationText.append("\n");
+                    }
+                    demostrations.add((Expression) result);
+                    demostrationText.append(result.toString());
+                }
+            }
             return null;
         }
 

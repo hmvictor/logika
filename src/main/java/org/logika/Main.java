@@ -18,11 +18,6 @@ import static org.logika.exp.UnaryOperator.NEGATION;
 public class Main {
     
     public static void main(String[] args) {
-//        Expresion expr=new BinaryOperation(Operator.CONJUNCTION, new Sentence("A"), new Sentence("B"));
-//        
-//        conjuction(sentence("A"), negate(sentence("B")));
-//        conjunction(disyunction(sentence("A"), negate(sentence("A"))), sentence("B")).evaluate(value("A", false).value("B", true));
-        
         Sentence a=new Sentence('A');
         Sentence b=new Sentence('B');
         Sentence c=new Sentence('C');
@@ -61,13 +56,6 @@ public class Main {
             }
             System.out.printf(" = %s%n", row.getConclusionValue()? 'V': 'F');
         }
-        
-//        for(TablaVerdad.Row row:tablaVerdad.getRows()) {
-//            for (Boolean value : row.getVariableValues()) {
-//                System.out.printf("%s ", value? 'V': 'F');
-//            }
-//            System.out.printf(" = %s%n", row.getResult());
-//        }
     }
     
 }

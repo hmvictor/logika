@@ -1,9 +1,9 @@
 package org.logika.exp;
 
 import java.util.Map;
-import org.logika.functions.Pattern;
-import org.logika.functions.UnaryOperationPattern;
-import static org.logika.functions.VarPattern.var;
+import org.logika.inference.Pattern;
+import org.logika.inference.UnaryOperationPattern;
+import static org.logika.inference.VarPattern.var;
 
 /**
  *
