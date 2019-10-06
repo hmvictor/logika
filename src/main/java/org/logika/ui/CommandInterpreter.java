@@ -1,19 +1,16 @@
 package org.logika.ui;
 
 import java.awt.Frame;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
-import javax.swing.table.TableModel;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.logika.Argument;
 import org.logika.ExpressionOperations;
-import org.logika.TablaVerdadExpresion;
-import org.logika.TablaVerdadArgumento;
 import org.logika.equivalence.Asociation;
 import org.logika.equivalence.Conmutation;
 import org.logika.equivalence.DeMorgan;
@@ -40,12 +37,14 @@ import org.logika.functions.SilogismoHipotetico;
 import org.logika.functions.Simplificacion;
 import org.logika.grammar.LogikaParser;
 import org.logika.equivalence.EquivalenceFunction;
+import org.logika.grammar.LogikaLexer;
+import org.logika.ui.PropositionalExpressionParser.PropositionalExpresionListener;
 
 /**
  *
  * @author Víctor
  */
-public class CommandInterpreter extends BaseListener {
+public class CommandInterpreter extends PropositionalExpresionListener {
     private Frame owner;
     private Argument argument;
     private List<Expression> demostrations;
@@ -55,7 +54,6 @@ public class CommandInterpreter extends BaseListener {
     private Map<String, EquivalenceFunction> equivalencesByName=new HashMap<>();
 
     public CommandInterpreter(Frame owner, Argument argument, List<Expression> demostrations) {
-        super(new Stack<>());
         this.owner=owner;
         this.argument=argument;
         this.demostrations=demostrations;
@@ -83,43 +81,53 @@ public class CommandInterpreter extends BaseListener {
     public Object getResult() {
         return result;
     }
-
-    @Override
-    public void exitPrint_command(LogikaParser.Print_commandContext ctx) {
-        if(ctx.getChild(1).getText().equals("argument")) {
-            StringWriter stringWriter = new StringWriter();
-            argument.print(new PrintWriter(stringWriter));
-            new TextDialog(null, stringWriter.toString()).setVisible(true);
-        }else{
-            Expression exp=(Expression) getStack().pop();
-            new TextDialog(null, exp.toUserString(argument.getDescriptionByAlias())).setVisible(true);
-        }
-    }
-
-    @Override
-    public void exitThruth_table_command(LogikaParser.Thruth_table_commandContext ctx) {
-        if(ctx.getChild(1).getText().equals("argument")) {
-            TablaVerdadArgumento tablaVerdad = argument.createTablaVerdad();
-            TableModel tableModel=new ThruthTableModel(tablaVerdad);
-            new ThruthTableDialog(owner, tableModel).setVisible(true);
-        }else{
-            Expression exp=(Expression) getStack().pop();
-            TablaVerdadExpresion tablaVerdad = TablaVerdadExpresion.build(exp);
-            TableModel tableModel=new ThruthTableModel(tablaVerdad);
-            new ThruthTableDialog(owner, tableModel).setVisible(true);
-        }
-        
-    }
     
-    @Override
-    public void exitPath_command(LogikaParser.Path_commandContext ctx) {
-        List<ExpressionOperations.ExpressionOperation> operations=(List<ExpressionOperations.ExpressionOperation>) getStack().pop();
-        Expression expression=(Expression) getStack().pop();
-        result=ExpressionOperations.get(expression, operations);
+    public Object execute(String text) {
+        LogikaLexer lexer = new LogikaLexer(CharStreams.fromString(text.trim()));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        LogikaParser parser = new LogikaParser(tokens);
+        ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
+        CommandInterpreter commandInterpreter = new CommandInterpreter(owner, argument, demostrations);
+        parseTreeWalker.walk(commandInterpreter, parser.command());
+        return commandInterpreter.getResult();
     }
 
+//    @Override
+//    public void exitPrint_command(LogikaParser.Print_commandContext ctx) {
+//        if(ctx.getChild(1).getText().equals("argument")) {
+//            StringWriter stringWriter = new StringWriter();
+//            argument.print(new PrintWriter(stringWriter));
+//            new TextDialog(null, stringWriter.toString()).setVisible(true);
+//        }else{
+//            Expression exp=(Expression) getStack().pop();
+//            new TextDialog(null, exp.toUserString(argument.getDescriptionByAlias())).setVisible(true);
+//        }
+//    }
+//
+//    @Override
+//    public void exitThruth_table_command(LogikaParser.Thruth_table_commandContext ctx) {
+//        if(ctx.getChild(1).getText().equals("argument")) {
+//            TablaVerdadArgumento tablaVerdad = argument.createTablaVerdad();
+//            TableModel tableModel=new ThruthTableModel(tablaVerdad);
+//            new ThruthTableDialog(owner, tableModel).setVisible(true);
+//        }else{
+//            Expression exp=(Expression) getStack().pop();
+//            TablaVerdadExpresion tablaVerdad = TablaVerdadExpresion.build(exp);
+//            TableModel tableModel=new ThruthTableModel(tablaVerdad);
+//            new ThruthTableDialog(owner, tableModel).setVisible(true);
+//        }
+//        
+//    }
+    
+//    @Override
+//    public void exitPath_command(LogikaParser.Path_commandContext ctx) {
+//        List<ExpressionOperations.ExpressionOperation> operations=(List<ExpressionOperations.ExpressionOperation>) getStack().pop();
+//        Expression expression=(Expression) getStack().pop();
+//        result=ExpressionOperations.get(expression, operations);
+//    }
+
     @Override
-    public void exitPath_expr(LogikaParser.Path_exprContext ctx) {
+    public void exitExpressionPath(LogikaParser.ExpressionPathContext ctx) {
         List<TerminalNode> paths = ctx.PATH();
         List<ExpressionOperations.ExpressionOperation> operations=new LinkedList<>();
         for (TerminalNode path : paths) {
@@ -140,7 +148,7 @@ public class CommandInterpreter extends BaseListener {
     }
 
     @Override
-    public void exitProposition_expr(LogikaParser.Proposition_exprContext ctx) {
+    public void exitPropExpOperand(LogikaParser.PropExpOperandContext ctx) {
         Object value = getStack().pop();
         if(value instanceof Integer) {
             int index=(int) value;
@@ -155,12 +163,12 @@ public class CommandInterpreter extends BaseListener {
     }
     
     @Override
-    public void exitFunction_command(LogikaParser.Function_commandContext ctx) {
+    public void exitDeductionCommand(LogikaParser.DeductionCommandContext ctx) {
         List<Expression> expressions=new LinkedList<>();
-        for (LogikaParser.Proposition_exprContext exprContext : ctx.proposition_expr()) {
-            expressions.add(0, (Expression) getStack().pop());
+        for (LogikaParser.PropExpOperandContext exprContext : ctx.propExpOperand()) {
+            expressions.add(0, getExpression());
         }
-        String functionName=ctx.getChild(0).getText();
+        String functionName=ctx.getChild(ctx.getChildCount()-1).getText();
         if(!functionsByName.containsKey(functionName)) {
             throw new IllegalArgumentException("Undefined function: "+functionName);
         }
@@ -168,22 +176,32 @@ public class CommandInterpreter extends BaseListener {
     }
 
     @Override
-    public void exitEquiv_command(LogikaParser.Equiv_commandContext ctx) {
+    public void exitEquivalenceCommand(LogikaParser.EquivalenceCommandContext ctx) {
         Object lastParam=getStack().pop();
         List<ExpressionOperations.ExpressionOperation> operations=null;
         Expression expression;
         if(lastParam instanceof List) {
             operations=(List<ExpressionOperations.ExpressionOperation>) lastParam;
-            expression = (Expression) getStack().pop();
+            expression = getExpression();
         }else{
             operations=new LinkedList<>();
             expression = (Expression) lastParam;
         }
-        LogikaParser.VariationContext variationCtx = ctx.variation();
-        String equivFunctionName=ctx.getChild(0).getText();
-        result=copiar(equivFunctionName, variationCtx == null ? -1: Integer.parseInt(variationCtx.getChild(1).getText()), expression, new LinkedList<>(), operations);
+        LogikaParser.DiscriminatorContext discriminatorCtx = ctx.discriminator();
+        String equivFunctionName=ctx.getChild(discriminatorCtx == null ? ctx.getChildCount()-1: ctx.getChildCount()-2).getText();
+        result=copiar(equivFunctionName, discriminatorCtx == null || discriminatorCtx.getChildCount() == 0 ? -1: Integer.parseInt(discriminatorCtx.getChild(1).getText()), expression, new LinkedList<>(), operations);
     }
-    
+
+    @Override
+    public void exitPathCommand(LogikaParser.PathCommandContext ctx) {
+        List<ExpressionOperations.ExpressionOperation> operations=(List<ExpressionOperations.ExpressionOperation>) getStack().pop();
+        result=ExpressionOperations.get((Expression) getStack().pop(), operations);
+    }
+
+    @Override
+    public void exitExpressionCommand(LogikaParser.ExpressionCommandContext ctx) {
+        result=getStack().pop();
+    }
     
     private Expression copiar(String name, int variation, Expression expression, List<ExpressionOperations.ExpressionOperation> path, List<ExpressionOperations.ExpressionOperation> operations) {
         boolean match=true;
@@ -224,5 +242,5 @@ public class CommandInterpreter extends BaseListener {
         }
         return equivalencesByName.get(functionName).apply(variation, expression);
     }
-    
+
 }

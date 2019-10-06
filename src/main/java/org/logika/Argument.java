@@ -32,6 +32,10 @@ public class Argument {
         this.conclusion=conclusion;
         return this;
     }
+
+    public Expression getConclusion() {
+        return conclusion;
+    }
     
     public Argument premise(Expression expr) {
         premises.add(expr);

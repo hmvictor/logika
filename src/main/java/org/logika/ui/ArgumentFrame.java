@@ -512,38 +512,39 @@ public class ArgumentFrame extends javax.swing.JFrame {
     }
     
     private Argument parseArgument() throws RecognitionException {
-        LogikaLexer lexer = new LogikaLexer(CharStreams.fromString(argumentText.getText().trim()));
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        LogikaParser parser = new LogikaParser(tokens);
-        ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
-        LogikaBaseListenerImpl logikaBaseListenerImpl = new LogikaBaseListenerImpl();
-        parseTreeWalker.walk(logikaBaseListenerImpl, parser.argument());
-        Argument argument = logikaBaseListenerImpl.getArgument();
-        return argument;
+        throw new UnsupportedOperationException();
+//        LogikaLexer lexer = new LogikaLexer(CharStreams.fromString(argumentText.getText().trim()));
+//        CommonTokenStream tokens = new CommonTokenStream(lexer);
+//        LogikaParser parser = new LogikaParser(tokens);
+//        ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
+//        ArgumentListener logikaBaseListenerImpl = new ArgumentListener();
+//        parseTreeWalker.walk(logikaBaseListenerImpl, parser.argument());
+//        Argument argument = logikaBaseListenerImpl.getArgument();
+//        return argument;
     }
 
     private class CommandWorker extends SwingWorker<Void, Void> {
 
         @Override
         protected Void doInBackground() throws Exception {
-            Argument argument = parseArgument();
-            
-            int caretpos = commandText.getCaretPosition();
-            int linenum = commandText.getLineOfOffset(caretpos);
-            LogikaLexer lexer = new LogikaLexer(CharStreams.fromString(commandText.getText().split("\n")[linenum].trim()));
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
-            LogikaParser parser = new LogikaParser(tokens);
-            ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
-            CommandInterpreter commandInterpreter = new CommandInterpreter(ArgumentFrame.this, argument, demostrations);
-            parseTreeWalker.walk(commandInterpreter, parser.command());
-            Object result=commandInterpreter.getResult();
-            if(result instanceof Expression) {
-                if(!demostrationText.getText().trim().isEmpty()) {
-                    demostrationText.append("\n");
-                }
-                demostrations.add((Expression) result);
-                demostrationText.append(result.toString());
-            }
+//            Argument argument = parseArgument();
+//            
+//            int caretpos = commandText.getCaretPosition();
+//            int linenum = commandText.getLineOfOffset(caretpos);
+//            LogikaLexer lexer = new LogikaLexer(CharStreams.fromString(commandText.getText().split("\n")[linenum].trim()));
+//            CommonTokenStream tokens = new CommonTokenStream(lexer);
+//            LogikaParser parser = new LogikaParser(tokens);
+//            ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
+//            CommandInterpreter commandInterpreter = new CommandInterpreter(ArgumentFrame.this, argument, demostrations);
+//            parseTreeWalker.walk(commandInterpreter, parser.command());
+//            Object result=commandInterpreter.getResult();
+//            if(result instanceof Expression) {
+//                if(!demostrationText.getText().trim().isEmpty()) {
+//                    demostrationText.append("\n");
+//                }
+//                demostrations.add((Expression) result);
+//                demostrationText.append(result.toString());
+//            }
             return null;
         }
 
@@ -566,22 +567,22 @@ public class ArgumentFrame extends javax.swing.JFrame {
             
             demostrations.clear();
             demostrationText.setText(null);
-            for (String command : commandText.getText().split("\n")) {
-                LogikaLexer lexer = new LogikaLexer(CharStreams.fromString(command.trim()));
-                CommonTokenStream tokens = new CommonTokenStream(lexer);
-                LogikaParser parser = new LogikaParser(tokens);
-                ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
-                CommandInterpreter commandInterpreter = new CommandInterpreter(ArgumentFrame.this, argument, demostrations);
-                parseTreeWalker.walk(commandInterpreter, parser.command());
-                Object result=commandInterpreter.getResult();
-                if(result instanceof Expression) {
-                    if(!demostrationText.getText().trim().isEmpty()) {
-                        demostrationText.append("\n");
-                    }
-                    demostrations.add((Expression) result);
-                    demostrationText.append(result.toString());
-                }
-            }
+//            for (String command : commandText.getText().split("\n")) {
+//                LogikaLexer lexer = new LogikaLexer(CharStreams.fromString(command.trim()));
+//                CommonTokenStream tokens = new CommonTokenStream(lexer);
+//                LogikaParser parser = new LogikaParser(tokens);
+//                ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
+//                CommandInterpreter commandInterpreter = new CommandInterpreter(ArgumentFrame.this, argument, demostrations);
+//                parseTreeWalker.walk(commandInterpreter, parser.command());
+//                Object result=commandInterpreter.getResult();
+//                if(result instanceof Expression) {
+//                    if(!demostrationText.getText().trim().isEmpty()) {
+//                        demostrationText.append("\n");
+//                    }
+//                    demostrations.add((Expression) result);
+//                    demostrationText.append(result.toString());
+//                }
+//            }
             return null;
         }
 

@@ -25,34 +25,25 @@ public class BaseListener extends LogikaBaseListener {
         return stack;
     }
     
-    @Override
-    public void exitSentence_expression(LogikaParser.Sentence_expressionContext ctx) {
-        stack.push(new Sentence(ctx.getText().charAt(0)));
-        System.out.println("exit sentence " + ctx.getText());
-    }
-
-    @Override
-    public void exitUnary_operation(LogikaParser.Unary_operationContext ctx) {
-        stack.push(new UnaryOperation(UnaryOperator.of(ctx.getChild(0).getText()), (Expression) stack.pop()));
-        System.out.println("unary operation " + ctx.getText());
-    }
-
-    @Override
-    public void exitBinary_operation(LogikaParser.Binary_operationContext ctx) {
-        Expression right = (Expression) stack.pop();
-        BinaryOperator operator = BinaryOperator.of(ctx.getChild(2).getText());
-        Expression left = (Expression) stack.pop();
-        stack.push(new BinaryOperation(operator, left, right));
-        System.out.println("binary operation " + ctx.getText());
-    }
-
 //    @Override
-//    public void exitSimple_binary_operation(LogikaParser.Simple_binary_operationContext ctx) {
+//    public void exitSentence_expression(LogikaParser.Sentence_expressionContext ctx) {
+//        stack.push(new Sentence(ctx.getText().charAt(0)));
+//        System.out.println("exit sentence " + ctx.getText());
+//    }
+//
+//    @Override
+//    public void exitUnary_operation(LogikaParser.Unary_operationContext ctx) {
+//        stack.push(new UnaryOperation(UnaryOperator.of(ctx.getChild(0).getText()), (Expression) stack.pop()));
+//        System.out.println("unary operation " + ctx.getText());
+//    }
+//
+//    @Override
+//    public void exitBinary_operation(LogikaParser.Binary_operationContext ctx) {
 //        Expression right = (Expression) stack.pop();
-//        BinaryOperator operator = BinaryOperator.valueOfSymbol(ctx.getChild(1).getText());
+//        BinaryOperator operator = BinaryOperator.of(ctx.getChild(2).getText());
 //        Expression left = (Expression) stack.pop();
 //        stack.push(new BinaryOperation(operator, left, right));
-//        System.out.println("simple binary operation " + ctx.getText());
+//        System.out.println("binary operation " + ctx.getText());
 //    }
-    
+
 }

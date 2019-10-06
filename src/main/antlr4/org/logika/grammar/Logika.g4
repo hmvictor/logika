@@ -1,62 +1,48 @@
 grammar Logika;
 
-/*root
-    : argument
-    | proposition
-    ;*/
+import Propositions;
 
-argument
-    : premises NEWLINE '∴' conclusion definitions
-    ;
+root: argument | command;
 
-premises
-    : proposition (NEWLINE proposition)*
-    ;
+argument : premises NEWLINE '∴' conclusion definitions;
 
-conclusion
-    : proposition
-    ;
+premises : propositionalExpression (NEWLINE propositionalExpression)*;
 
-definitions
-    : (NEWLINE definition)*
-    ;
+conclusion : propositionalExpression;
 
-definition
-    : SENTENCE ')' TEXT
-    ;
+definitions : (NEWLINE definition)*;
+
+definition : SENTENCE ')' TEXT;
 
 command
-    : path_command
-    | function_command
-    | equiv_command
-    | thruth_table_command
+    : deductionCommand
+    | equivalenceCommand
+    | pathCommand
+    | expressionCommand;
+/*    | thruth_table_command
     | print_command
-    ;
+    ;*/
 
-path_command
-    : proposition COMMA path_expr
-    ;
 
-function_command
-    : FUNCNAME proposition_expr (COMMA proposition_expr)*
-    ;
+deductionCommand : propExpOperand (',' propExpOperand)? DEDUCTION_RULE_NAME;
 
-equiv_command
-    : EQ_FN variation? proposition_expr path_expr?
-    ;
+equivalenceCommand : propExpOperand expressionPath? EQ_RULE_NAME discriminator;
 
-variation
-    : '(' integer ')' 
-    ;
+propExpOperand : integer | propositionalExpression;
 
-path_expr
-    : PATH (/ PATH)* 
-    ;
+discriminator : '(' integer ')';
+
+expressionPath : (/ PATH)+;
 
 integer
     : DIGIT+
     ;
 
+pathCommand : propExpOperand expressionPath;
+
+expressionCommand : propExpOperand;
+
+/*
 thruth_table_command
     : 'truth_table' (proposition_expr| 'argument')
     ;
@@ -64,45 +50,9 @@ thruth_table_command
 print_command
     : 'print' (proposition_expr| 'argument')
     ;
-
-proposition_expr
-    : integer
-    | proposition
-    ;
-
-/*root
-    : argument
-    ;
 */
-proposition 
-    : unary_operation
-    | binary_operation
-    | sentence_expression
-    /*| simple_binary_operation */
-    ;
 
-sentence_expression
-    : SENTENCE
-    ;
-
-operation
-    : unary_operation 
-    | binary_operation
-    ;
-
-unary_operation
-    : UNARY_OPERATOR proposition
-    ;
-
-/*simple_binary_operation 
-    : sentence_expression BINARY_OPERATOR sentence_expression
-    ;*/
-
-binary_operation 
-    : '(' proposition BINARY_OPERATOR proposition ')'
-    ;
-
-EQ_FN
+EQ_RULE_NAME
     : 'De.M.'
     | 'Conm.'
     | 'Asoc.'
@@ -115,17 +65,7 @@ EQ_FN
     | 'Taut.'
     ;
 
-DIGIT
-    : [0-9]
-    ;
-
-PATH
-    : 'right'
-    | 'left'
-    | 'operand'
-    ;
-
-FUNCNAME
+DEDUCTION_RULE_NAME
     : 'M.P.'
     | 'M.T.'
     | 'S.H.'
@@ -137,37 +77,18 @@ FUNCNAME
     | 'Ad.'
     ;
 
-SENTENCE 
-    : [A-W]
-    ;
+DIGIT : [0-9];
 
-UNARY_OPERATOR 
-    : '~' 
-    ;
+PATH : 'right' | 'left' | 'operand';
 
-BINARY_OPERATOR 
-    : '˅' 
-    | '⊃'
-    | '≡'
-    | '•'
-    ;
+THEREOF : '∴';
 
-THEREOF
-    : '∴'
-    ;
+TEXT : '"' ~["\\\r\n]* '"';
 
-TEXT
-    : '"' ~["\\\r\n]* '"'
-    ;
+//TEXT_CHARACTER : ~["\\\r\n];
 
-NEWLINE
-    : '\n'
-    ;
+NEWLINE : '\n';
 
-COMMA
-    : ','
-    ;
+COMMA : ',';
 
-WHITESPACE 
-    : ' ' -> skip
-    ;
+WHITESPACE : ' ' -> skip;
