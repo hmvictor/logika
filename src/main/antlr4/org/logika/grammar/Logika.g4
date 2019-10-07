@@ -53,7 +53,7 @@ print_command
 */
 
 EQ_RULE_NAME
-    : 'De.M.'
+    : 'DeM.'
     | 'Conm.'
     | 'Asoc.'
     | 'Dist.'

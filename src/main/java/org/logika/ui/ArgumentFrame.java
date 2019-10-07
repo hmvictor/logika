@@ -129,20 +129,6 @@ public class ArgumentFrame extends javax.swing.JFrame {
         fileChooser.setFileFilter(new FileNameExtensionFilter("JSON", "json"));
     }
     
-    private static class InsertSymbolAction extends AbstractAction {
-        private String symbol;
-
-        public InsertSymbolAction(String symbol) {
-            this.symbol = symbol;
-        }
-        
-        @Override
-        public void actionPerformed(ActionEvent event) {
-            JTextArea textArea = (JTextArea)event.getSource();
-            textArea.insert(symbol, textArea.getCaretPosition());
-        }
-        
-    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -426,7 +412,7 @@ public class ArgumentFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton8ActionPerformed
 
     private void jButton12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton12ActionPerformed
-        String input = JOptionPane.showInputDialog(this, "Enter a expression, number or leave null for argument");
+        String input = new InputDialog(this).showInput();
         if(input != null) {
             Argument argumento = new ArgumentParser().parseArgument(argumentText.getText().trim());
             StringWriter stringWriter = new StringWriter();
@@ -449,7 +435,7 @@ public class ArgumentFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton12ActionPerformed
 
     private void jButton13ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton13ActionPerformed
-        String input = JOptionPane.showInputDialog(this, "Enter a expression, number or leave null for argument");
+        String input = new InputDialog(this).showInput();
         if(input != null) {
             Argument argumento = new ArgumentParser().parseArgument(argumentText.getText().trim());
             if(input.isBlank()) {

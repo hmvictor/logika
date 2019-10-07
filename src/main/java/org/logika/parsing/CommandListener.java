@@ -61,7 +61,7 @@ class CommandListener extends PropositionalExpresionListener {
         functionsByName.put("Conj.", new Conjuncion());
         functionsByName.put("Simp.", new Simplificacion());
         functionsByName.put("Ad.", new Adicion());
-        equivalencesByName.put("De.M.", new DeMorgan());
+        equivalencesByName.put("DeM.", new DeMorgan());
         equivalencesByName.put("Conm.", new Conmutation());
         equivalencesByName.put("Asoc.", new Asociation());
         equivalencesByName.put("Dist.", new Distribution());
