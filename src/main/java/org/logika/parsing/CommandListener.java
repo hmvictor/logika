@@ -22,6 +22,7 @@ import org.logika.exp.BinaryOperation;
 import org.logika.exp.Expression;
 import org.logika.exp.Sentence;
 import org.logika.exp.UnaryOperation;
+import static org.logika.exp.UnaryOperator.NEGATION;
 import org.logika.inference.Absorcion;
 import org.logika.inference.Adicion;
 import org.logika.inference.Conjuncion;
@@ -125,6 +126,11 @@ class CommandListener extends PropositionalExpresionListener {
         getStack().push(Integer.parseInt(ctx.getText()));
     }
 
+    @Override
+    public void exitIndirectProof(LogikaParser.IndirectProofContext ctx) {
+        result=NEGATION.of(argument.getConclusion());
+    }
+    
     @Override
     public void exitPropExpOperand(LogikaParser.PropExpOperandContext ctx) {
         Object value = getStack().pop();

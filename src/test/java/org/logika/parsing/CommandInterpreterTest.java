@@ -22,7 +22,7 @@ public class CommandInterpreterTest {
     @ParameterizedTest
     @MethodSource("testData")
     public void debeInterpretarComando(String text, Expression expectedResult) {
-        Expression result=(Expression) new CommandInterpreter(null, new Argument(), new LinkedList<>()).execute(text);
+        Expression result=(Expression) new CommandInterpreter(null, new Argument().premise(new Sentence('A')).then(new Sentence('A')), new LinkedList<>()).execute(text);
         assertThat(result, is(expectedResult));
     }
     
@@ -32,7 +32,8 @@ public class CommandInterpreterTest {
             Arguments.of("A D.N.", NEGATION.of(NEGATION.of('A'))), 
             Arguments.of("A˅B/right D.N.", DISYUNCTION.of(new Sentence('A'), NEGATION.of(NEGATION.of('B')))),
             Arguments.of("A˅B/right", new Sentence('B')),
-            Arguments.of("A˅B", DISYUNCTION.of('A', 'B'))    
+            Arguments.of("A˅B", DISYUNCTION.of('A', 'B')),
+            Arguments.of("P.I.", NEGATION.of('A'))
         );
     }
     

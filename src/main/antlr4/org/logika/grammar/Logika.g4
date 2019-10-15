@@ -18,11 +18,13 @@ command
     : deductionCommand
     | equivalenceCommand
     | pathCommand
-    | expressionCommand;
+    | expressionCommand
+    | indirectProof;
 /*    | thruth_table_command
     | print_command
     ;*/
 
+indirectProof : 'P.I.';
 
 deductionCommand : propExpOperand (',' propExpOperand)? DEDUCTION_RULE_NAME;
 
